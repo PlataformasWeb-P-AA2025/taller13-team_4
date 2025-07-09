@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Departamentos</title></head>
+<body>
+<h5>Departamentos – {{ numero_departamentos }}</h5>
+{% for d in departamentos %}
+<ol>
+  <li><b>Propietario:</b> {{ d.nombre_propietario }}</li>
+  <li><b>Costo:</b> {{ d.costo }}</li>
+  <li><b>Nº cuartos:</b> {{ d.numero_cuartos }}</li>
+  <li><b>Edificio:</b> {{ d.edificio }}</li>
+</ol><hr>
+{% endfor %}
+<a href="{{ url_for('crear_departamento') }}">Crear departamento</a><br>
+<a href="{{ url_for('losedificios') }}">Volver a edificios</a>
+</body>
+</html>

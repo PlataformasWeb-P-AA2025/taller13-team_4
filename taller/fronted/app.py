@@ -1,156 +1,104 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-import requests
-import json
+import requests, json
+from config import usuario, clave
 
-app = Flask(__name__, template_folder='templates')
-app.config['SECRET_KEY'] = 'una-clave-secreta-000001'
+app = Flask(__name__, template_folder="templates")
+app.secret_key = "flask-demo-secret"
 
-token = '31439500f8cfec1942768028edc43988f96baa32'
-headers = {
-        "Authorization": f"Token {token}",
-        "Content-Type": "application/json"
-    }
-
+# ───────────────────────
+#  LISTADOS
+# ───────────────────────
 @app.route("/")
-def hello_world():
-    return "<p>Hola mundo</p>"
+def root():
+    return redirect(url_for("losedificios"))
 
+@app.route("/losedificios")
+def losedificios():
+    r = requests.get(
+        "http://127.0.0.1:8000/api/edificios/",
+        auth=(usuario, clave)
+    )
+    edificios   = json.loads(r.content)["results"]
+    total_edifs = json.loads(r.content)["count"]
+    return render_template(
+        "losedificios.html",
+        edificios=edificios,
+        numero_edificios=total_edifs,
+    )
 
-@app.route("/los/estudiantes")
-def los_estudiantes():
-    """
-    """
-    r = requests.get("http://localhost:8000/api/estudiantes/",
-            auth=('carloss', '09081999carlos'))
-    print("---------------------")
-    print(r.content)
-    print("---------------------")
-    estudiantes = json.loads(r.content)['results']
+def obtener_nombre_edificio(url):
+    r = requests.get(url, auth=(usuario, clave))
+    return json.loads(r.content)["nombre"]
 
-    numero_estudiantes = json.loads(r.content)['count']
-    return render_template("losestudiantes.html", estudiantes=estudiantes,
-    numero_estudiantes=numero_estudiantes)
+@app.route("/losdepartamentos")
+def losdepartamentos():
+    r = requests.get(
+        "http://127.0.0.1:8000/api/departamentos/",
+        auth=(usuario, clave)
+    )
+    departamentos_raw = json.loads(r.content)["results"]
+    total_deps        = json.loads(r.content)["count"]
 
-@app.route("/los/estudiantes/dos")
-def los_estudiantes_dos():
-    """
-    """
-
-    r = requests.get("http://localhost:8000/api/estudiantes/", headers=headers)
-
-    print("---------------------")
-    print(r.content)
-    print("---------------------")
-    estudiantes = json.loads(r.content)['results']
-
-    numero_estudiantes = json.loads(r.content)['count']
-    return render_template("losestudiantes.html", estudiantes=estudiantes,
-    numero_estudiantes=numero_estudiantes)
-
-
-@app.route("/los/telefonos")
-def los_telefonos():
-    """
-    """
-    r = requests.get("http://localhost:8000/api/numerosts/",
-            auth=('carloss', '09081999carlos'))
-    datos = json.loads(r.content)['results']
-    numero = json.loads(r.content)['count']
-    return render_template("lostelefonos.html", datos=datos,
-    numero=numero)
-
-
-@app.route("/los/telefonos/dos")
-def los_telefonos_dos():
-    """
-    """
-    r = requests.get("http://localhost:8000/api/numerosts/",
-            headers=headers)
-    datos = json.loads(r.content)['results']
-    numero = json.loads(r.content)['count']
-    datos2 = []
-    for d in datos:
-        datos2.append(
-
+    departamentos = [
         {
-        'telefono':d['telefono'],
-        'tipo':d['tipo'],
-        'estudiante': obtener_estudiante(d['estudiante'])}
-        # http://127.0.0.1:8000/api/estudiantes/4/
-        # René
+            "nombre_propietario": d["nombre_propietario"],
+            "costo": d["costo"],
+            "numero_cuartos": d["numero_cuartos"],
+            "edificio": obtener_nombre_edificio(d["edificio"]),
+        }
+        for d in departamentos_raw
+    ]
+    return render_template(
+        "losdepartamentos.html",
+        departamentos=departamentos,
+        numero_departamentos=total_deps,
+    )
+
+# ───────────────────────
+#  CREAR REGISTROS
+# ───────────────────────
+@app.route("/crear_edificio", methods=["GET", "POST"])
+def crear_edificio():
+    if request.method == "POST":
+        payload = {
+            "nombre":    request.form["nombre"],
+            "direccion": request.form["direccion"],
+            "ciudad":    request.form["ciudad"],
+            "tipo":      request.form["tipo"],
+        }
+        r = requests.post(
+            "http://127.0.0.1:8000/api/edificios/",
+            json=payload,
+            auth=(usuario, clave),
         )
-    return render_template("lostelefonosdos.html", datos=datos2,
-    numero=numero)
+        flash("Edificio creado ✔" if r.status_code == 201 else "Error ❌")
+        return redirect(url_for("losedificios"))
+    return render_template("crear_edificio.html")
 
-# funciones ayuda
+@app.route("/crear_departamento", methods=["GET", "POST"])
+def crear_departamento():
+    # Traer edificios para el <select>
+    edifs = requests.get(
+        "http://127.0.0.1:8000/api/edificios/",
+        auth=(usuario, clave)
+    ).json()["results"]
 
-def obtener_estudiante(url):
-    """
-    http://127.0.0.1:8000/api/estudiantes/4/
-    """
-    r = requests.get(url, headers=headers)
-    nombre_estudiante = json.loads(r.content)['nombre']
-    return nombre_estudiante
+    if request.method == "POST":
+        payload = {
+            "nombre_propietario": request.form["nombre_propietario"],
+            "costo":              request.form["costo"],
+            "numero_cuartos":     request.form["numero_cuartos"],
+            "edificio":           request.form["edificio"],  # URL completa
+        }
+        r = requests.post(
+            "http://127.0.0.1:8000/api/departamentos/",
+            json=payload,
+            auth=(usuario, clave),
+        )
+        flash("Departamento creado ✔" if r.status_code == 201 else "Error ❌")
+        return redirect(url_for("losdepartamentos"))
+    return render_template("crear_departamento.html", edificios=edifs)
 
-@app.route("/crear_estudiante", methods=['GET', 'POST'])
-def agregar_estudiante():
-
-    """
-    """
-    if request.method == 'POST':
-        nombre = request.form['nombre']
-        apellido = request.form['apellido']
-        cedula = request.form['cedula']
-        correo = request.form['correo']
-
-        # Datos a enviar a la API de Django
-        estudiante_data = {'nombre': nombre,'apellido': apellido,'cedula': cedula,'correo': correo}
-
-        # Configuración de los headers para la autenticación por Token
-        headers = {"Authorization": f"Token {token}","Content-Type": "application/json"}
-
-        # Realizar la petición POST a la API de Django
-        r = requests.post("http://localhost:8000/api/estudiantes/",json=estudiante_data,headers=headers)
-
-
-        print(f"Status Code (Crear Estudiante): {r.status_code}")
-        # Si todo fue bien (código 201 Created), la API devuelve el objeto creado
-        nuevo_estudiante = json.loads(r.content)
-        flash(f"Estudiante '{nuevo_estudiante['nombre']} {nuevo_estudiante['apellido']}' creado exitosamente!", 'success')
-        return redirect(url_for('los_estudiantes')) # Redirigir a la lista de estudiantes
-
-    # Si es una petición GET o si hubo un error en POST, muestra el formulario
-    return render_template("crear_estudiante.html")
-
-@app.route("/crear_numero_telefonico", methods=['GET', 'POST'])
-def crear_numero_telefonico():
-    """
-    """
-    estudiantes_disponibles = []
-
-    r_estudiantes = requests.get("http://localhost:8000/api/estudiantes/", headers=headers)
-    estudiantes_disponibles = json.loads(r_estudiantes.content)['results']
-
-    if request.method == 'POST':
-        telefono = request.form['telefono']
-        tipo = request.form['tipo']
-
-        estudiante_url = request.form['estudiante']
-
-        numero_telefonico_data = {'telefono': telefono, 'tipo': tipo, 'estudiante': estudiante_url}
-
-        r = requests.post("http://localhost:8000/api/numerosts/", json=numero_telefonico_data, headers=headers)
-
-        print(f"Status Code (Crear Número): {r.status_code}")
-
-        nuevo_numero = json.loads(r.content)
-        flash(f"Número '{nuevo_numero['telefono']}' creado exitosamente para el estudiante!", 'success')
-        return redirect(url_for('los_estudiantes')) # Redirigir a la lista principal o a una de números
-
-    return render_template("crear_numero_telefonico.html",estudiantes=estudiantes_disponibles)
-
-
+# ───────────────────────
 if __name__ == "__main__":
     app.run(debug=True)
-
-

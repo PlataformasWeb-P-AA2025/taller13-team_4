@@ -46,11 +46,14 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.github',
     #
-    'serviciosWeb',
+    'administrativo',
 
     'rest_framework',
-    'rest_framework.authtoken',
+    # 'corsheaders',
 ]
+
+SITE_ID = 1
+LOGIN_REDIRECT_URL = "/"
 
 # agregar apps para Auth - paso 2
 AUTHENTICATION_BACKENDS = (
@@ -58,6 +61,30 @@ AUTHENTICATION_BACKENDS = (
     "allauth.account.auth_backends.AuthenticationBackend",
 )
 
+INSTALLED_APPS = [
+    # apps nativas
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+
+    # allauth
+    "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.github",
+
+    # app del proyecto
+    "administrativo",
+
+    # DRF
+    "rest_framework",
+]
+
+SITE_ID = 1
 
 # agregar apps para Auth - paso 3
 ACCOUNT_EMAIL_VERIFICATION = 'none'
@@ -65,21 +92,21 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
+    # 'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware'
 ]
 
-ROOT_URLCONF = 'backend/serviciosWeb.urls'
-WSGI_APPLICATION = 'backend.wsgi.application'
+ROOT_URLCONF = 'taller13.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [], # por defecto busca una carpeta llamada template en cada app
+        'DIRS': [], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -92,7 +119,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'proyectoUno.wsgi.application'
+WSGI_APPLICATION = 'taller13.wsgi.application'
 
 
 # Database
@@ -153,14 +180,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # agregar apps para Auth - paso 4
 LOGIN_REDIRECT_URL = reverse_lazy('index')
-SITE_ID = 3
+
 # agregar información para
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.TokenAuthentication', # Habilita la autenticación por token globalmente
-        'rest_framework.authentication.SessionAuthentication', # Mantener para el navegador y el panel admin
-    ],
+    'PAGE_SIZE': 10
 }
+
+"""
+ALLOWED_HOSTS=['*']
+CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:8000"
+]
+"""
