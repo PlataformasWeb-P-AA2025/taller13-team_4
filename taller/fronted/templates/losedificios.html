@@ -1,17 +1,40 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>Edificios</title></head>
+<head>
+  <meta charset="utf-8">
+  <title>Edificios</title>
+</head>
 <body>
 <h5>Listado de edificios – {{ numero_edificios }}</h5>
-{% for e in edificios %}
-<ol>
-  <li><b>Nombre:</b> {{ e.nombre }}</li>
-  <li><b>Dirección:</b> {{ e.direccion }}</li>
-  <li><b>Ciudad:</b> {{ e.ciudad }}</li>
-  <li><b>Tipo:</b> {{ e.tipo }}</li>
-</ol><hr>
-{% endfor %}
-<a href="{{ url_for('crear_edificio') }}">Crear edificio</a><br>
-<a href="{{ url_for('losdepartamentos') }}">Ver departamentos</a>
+
+<table border="1" cellpadding="5">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Dirección</th>
+      <th>Ciudad</th>
+      <th>Tipo</th>
+      <th>Opciones</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for e in edificios %}
+    <tr>
+      <td>{{ e.nombre }}</td>
+      <td>{{ e.direccion }}</td>
+      <td>{{ e.ciudad }}</td>
+      <td>{{ e.tipo }}</td>
+      <td>
+        <a href="{{ url_for('editar_edificio', id=e.id) }}">Editar</a> |
+        <a href="{{ url_for('eliminar_edificio', id=e.id) }}" onclick="return confirm('¿Seguro?')">Eliminar</a>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<br>
+<a href="{{ url_for('crear_edificio') }}">Crear edificio</a> |
+<a href="{{ url_for('lista_departamentos') }}">Ver departamentos</a>
 </body>
 </html>

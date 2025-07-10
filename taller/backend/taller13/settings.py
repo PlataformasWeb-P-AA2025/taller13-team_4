@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'administrativo',
 
     'rest_framework',
+    'rest_framework.authtoken',    
     # 'corsheaders',
 ]
 
@@ -61,30 +62,6 @@ AUTHENTICATION_BACKENDS = (
     "allauth.account.auth_backends.AuthenticationBackend",
 )
 
-INSTALLED_APPS = [
-    # apps nativas
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-
-    # allauth
-    "django.contrib.sites",
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
-    "allauth.socialaccount.providers.github",
-
-    # app del proyecto
-    "administrativo",
-
-    # DRF
-    "rest_framework",
-]
-
-SITE_ID = 1
 
 # agregar apps para Auth - paso 3
 ACCOUNT_EMAIL_VERIFICATION = 'none'
@@ -183,6 +160,14 @@ LOGIN_REDIRECT_URL = reverse_lazy('index')
 
 # agregar información para
 REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",   # ←  ¡obligatorio!
+    ],
+
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
 }
@@ -195,3 +180,4 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000"
 ]
 """
+

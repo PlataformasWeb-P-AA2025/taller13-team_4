@@ -3,15 +3,32 @@
 <head><meta charset="utf-8"><title>Departamentos</title></head>
 <body>
 <h5>Departamentos – {{ numero_departamentos }}</h5>
-{% for d in departamentos %}
-<ol>
-  <li><b>Propietario:</b> {{ d.nombre_propietario }}</li>
-  <li><b>Costo:</b> {{ d.costo }}</li>
-  <li><b>Nº cuartos:</b> {{ d.numero_cuartos }}</li>
-  <li><b>Edificio:</b> {{ d.edificio }}</li>
-</ol><hr>
-{% endfor %}
-<a href="{{ url_for('crear_departamento') }}">Crear departamento</a><br>
-<a href="{{ url_for('losedificios') }}">Volver a edificios</a>
+
+<table border="1" cellpadding="5">
+  <thead>
+    <tr>
+      <th>Propietario</th><th>Costo</th><th>Nº cuartos</th><th>Edificio</th><th>Opciones</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for d in departamentos %}
+    <tr>
+      <td>{{ d.nombre_propietario }}</td>
+      <td>{{ d.costo }}</td>
+      <td>{{ d.numero_cuartos }}</td>
+      <td>{{ d.edificio }}</td>
+      <td>
+        <a href="{{ url_for('editar_departamento', id=d.id) }}">Editar</a> |
+        <a href="{{ url_for('eliminar_departamento', id=d.id) }}"
+           onclick="return confirm('¿Seguro?')">Eliminar</a>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<br>
+<a href="{{ url_for('crear_departamento') }}">Crear departamento</a> |
+<a href="{{ url_for('lista_edificios') }}">Volver a edificios</a>
 </body>
 </html>

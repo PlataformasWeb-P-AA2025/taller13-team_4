@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Editar Edificio</title></head>
+<body>
+<h4>Editar Edificio</h4>
+<form method="post">
+  Nombre:    <input name="nombre"    value="{{ e.nombre }}"    required><br>
+  Dirección: <input name="direccion" value="{{ e.direccion }}" required><br>
+  Ciudad:    <input name="ciudad"    value="{{ e.ciudad }}"    required><br>
+  Tipo:
+  <select name="tipo">
+    <option value="residencial" {% if e.tipo == 'residencial' %}selected{% endif %}>Residencial</option>
+    <option value="comercial"   {% if e.tipo == 'comercial'   %}selected{% endif %}>Comercial</option>
+  </select><br>
+  <button type="submit">Guardar</button>
+</form>
+<a href="{{ url_for('lista_edificios') }}">Cancelar</a>
+</body>
+</html>
